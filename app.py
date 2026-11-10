@@ -1,7 +1,7 @@
 import streamlit as st
 
 # 1. Header Zone
-st.title("🍕 시험 기간 맞춤 큐레이터 '야식요정 AI'")
+st.title("🍕[test2]시험 기간 맞춤 큐레이터 '야식요정'")
 st.caption("※ 밤 10시 이후, 당신의 기분과 칼로리 상태에 따라 딱 맞는 야식을 추천합니다.")
 
 # 2. Sidebar Zone
