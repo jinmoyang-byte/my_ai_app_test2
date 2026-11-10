@@ -3,11 +3,11 @@
 # =================================================================
 import streamlit as st
 from google import genai
+from google.genai import types  # ⚡ 속도 최적화 설정을 위해 추가
 
 # -----------------------------------------------------------------
 # 1️⃣ [Secrets 보안] Google Gemini API 클라이언트 생성
 # -----------------------------------------------------------------
-# Streamlit Secrets(비밀 금고)에서 GEMINI_API_KEY를 안전하게 불러옵니다.
 client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 
 # -----------------------------------------------------------------
@@ -35,47 +35,58 @@ user_story = st.text_area(
     "어떤 상황인가요? 자유롭게 적어주세요:",
     placeholder="예: 내일 수학 시험인데 잠 깨는 매콤한 게 당겨!"
 )
+
 # -----------------------------------------------------------------
 # 5️⃣ [Action & Output Zone] Gemini API 호출 및 2단 결과 출력
 # -----------------------------------------------------------------
 if st.button("✨ AI 맞춤 추천받기"):
     if user_story:
-        # AI 로딩 모래시계 (st.spinner)
         with st.spinner(f"Gemini AI가 {user_name if user_name else '사용자'}님의 고민을 분석하고 있습니다... 🤖"):
             
-            # System Prompt (페르소나 지정) + User 입력값 조합
+            # ⚡ [속도 최적화 1] AI가 이해하기 쉽도록 구조화된 프롬프트로 수정 (연산 시간 단축)
             prompt_content = f"""
-            당신은 고등학교 2학년 학생의 마음을 잘 이해하는 친절한 야식 큐레이터 '야식요정 AI'입니다.
-            사용자 이름: {user_name if user_name else '학생'}
+            역할: 고등학교 2학년 학생 대상 친절한 '야식요정 AI'
+            사용자 이름: {user_name if user_name else '학생'} 
             오늘의 기분: {mood}
             현재 고민/상황: {user_story}
 
-            위 정보를 바탕으로 다음 2가지를 작성해 주세요:
+            위 정보를 바탕으로 다음 사항을 친근한 말투로 간결하게 작성해 주세요:
             1. 맞춤 추천 야식 메뉴 1개와 그 이유
             2. 칼로리 조절 또는 건강을 위한 섭취 꿀팁 1가지
             """
 
             try:
-                # ⭕ 최신 SDK 기준: 'models/' 접두사 없이 모델명만 입력합니다.
-                response = client.models.generate_content(
-                    model="gemini-3.8-flash",
-                    contents=prompt_content
+                # ⚡ [속도 최적화 2] 글자 수 제한 설정 생성 (장황한 답변을 방지하여 물리적 속도 향상)
+                fast_config = types.GenerateContentConfig(
+                    max_output_tokens=400,  # 답변 길이를 야식 추천에 충분한 300~400토큰으로 제한
+                    temperature=0.7
                 )
 
-                # 2단 칼럼 레이아웃으로 결과 분할 출력 (st.columns)
+                # ⚡ [속도 최적화 3] generate_content -> generate_content_stream 으로 변경 (실시간 출력)
+                response_stream = client.models.generate_content_stream(
+                    model="gemini-3.8-flash",
+                    contents=prompt_content,
+                    config=fast_config  # 최적화 설정 반영
+                )
+
+                # 2단 칼럼 레이아웃으로 결과 분할 출력
                 col1, col2 = st.columns(2)
                 
                 with col1:
                     st.success("🎉 Gemini AI 추천 야식")
-                    st.write(response.text)
+                    # ⚡ [속도 최적화 4] st.write_stream을 활용해 글자가 실시간으로 타이핑되듯 즉시 출력
+                    st.write_stream(chunk.text for chunk in response_stream)
                     
                 with col2:
                     st.info("💡 섭취 꿀팁 & 응원 메시지")
                     st.write("👉 야식을 먹은 후 바로 눕지 말고 30분 동안 암기 과목을 복습해 보세요!")
             
             except Exception as e:
-                # 🔍 무한 로딩 뒤에 숨은 진짜 에러를 화면에 강제로 출력합니다.
                 st.error(f"❌ API 호출 중 오류가 발생했습니다: {e}")
+                
+    else:
+        st.warning("⚠️ 고민 내용을 먼저 작성해 주세요!")
+
                 
     else:
         st.warning("⚠️ 고민 내용을 먼저 작성해 주세요!")
