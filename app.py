@@ -61,7 +61,7 @@ if st.button("✨ AI 맞춤 추천받기"):
                 )
 
                 response_stream = client.models.generate_content_stream(
-                    model="gemini-1.5-flash",  # 혹은 사용하시는 gemini-3.8-flash
+                    model="gemini-3.5-flash-lite",  # 혹은 사용하시는 gemini-3.8-flash
                     contents=prompt_content,
                     config=fast_config
                 )
