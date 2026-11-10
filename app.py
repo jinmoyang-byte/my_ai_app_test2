@@ -35,7 +35,6 @@ user_story = st.text_area(
     "어떤 상황인가요? 자유롭게 적어주세요:",
     placeholder="예: 내일 수학 시험인데 잠 깨는 매콤한 게 당겨!"
 )
-
 # -----------------------------------------------------------------
 # 5️⃣ [Action & Output Zone] Gemini API 호출 및 2단 결과 출력
 # -----------------------------------------------------------------
@@ -56,21 +55,27 @@ if st.button("✨ AI 맞춤 추천받기"):
             2. 칼로리 조절 또는 건강을 위한 섭취 꿀팁 1가지
             """
 
-            # Google Gemini API 호출 (gemini-1.5-flash 모델)
-            response = client.models.generate_content(
-                model="gemini-3.8-flash",
-                contents=prompt_content
-            )
+            try:
+                # ⭕ 최신 SDK 기준: 'models/' 접두사 없이 모델명만 입력합니다.
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=prompt_content
+                )
 
-            # 2단 칼럼 레이아웃으로 결과 분할 출력 (st.columns)
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.success("🎉 Gemini AI 추천 야식")
-                st.write(response.text)
+                # 2단 칼럼 레이아웃으로 결과 분할 출력 (st.columns)
+                col1, col2 = st.columns(2)
                 
-            with col2:
-                st.info("💡 섭취 꿀팁 & 응원 메시지")
-                st.write("👉 야식을 먹은 후 바로 눕지 말고 30분 동안 암기 과목을 복습해 보세요!")
+                with col1:
+                    st.success("🎉 Gemini AI 추천 야식")
+                    st.write(response.text)
+                    
+                with col2:
+                    st.info("💡 섭취 꿀팁 & 응원 메시지")
+                    st.write("👉 야식을 먹은 후 바로 눕지 말고 30분 동안 암기 과목을 복습해 보세요!")
+            
+            except Exception as e:
+                # 🔍 무한 로딩 뒤에 숨은 진짜 에러를 화면에 강제로 출력합니다.
+                st.error(f"❌ API 호출 중 오류가 발생했습니다: {e}")
+                
     else:
         st.warning("⚠️ 고민 내용을 먼저 작성해 주세요!")
