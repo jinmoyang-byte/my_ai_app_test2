@@ -81,8 +81,3 @@ if st.button("✨ AI 맞춤 추천받기"):
                 
     else:  # 👈 바로 이 else: 의 들여쓰기가 'if user_story:'와 수직으로 똑같이 맞아야 합니다!
         st.warning("⚠️ 고민 내용을 먼저 작성해 주세요!")
-
-
-                
-    else:
-        st.warning("⚠️ 고민 내용을 먼저 작성해 주세요!")
