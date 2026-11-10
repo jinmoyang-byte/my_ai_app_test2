@@ -43,12 +43,11 @@ if st.button("✨ AI 맞춤 추천받기"):
     if user_story:
         with st.spinner(f"Gemini AI가 {user_name if user_name else '사용자'}님의 고민을 분석하고 있습니다... 🤖"):
             
-            # ⚡ [속도 최적화 1] AI가 이해하기 쉽도록 구조화된 프롬프트로 수정 (연산 시간 단축)
             prompt_content = f"""
             역할: 고등학교 2학년 학생 대상 친절한 '야식요정 AI'
             사용자 이름: {user_name if user_name else '학생'} 
             오늘의 기분: {mood}
-            현재 고민/상황: {user_story}
+            current_situation: {user_story}
 
             위 정보를 바탕으로 다음 사항을 친근한 말투로 간결하게 작성해 주세요:
             1. 맞춤 추천 야식 메뉴 1개와 그 이유
@@ -56,25 +55,21 @@ if st.button("✨ AI 맞춤 추천받기"):
             """
 
             try:
-                # ⚡ [속도 최적화 2] 글자 수 제한 설정 생성 (장황한 답변을 방지하여 물리적 속도 향상)
                 fast_config = types.GenerateContentConfig(
-                    max_output_tokens=400,  # 답변 길이를 야식 추천에 충분한 300~400토큰으로 제한
+                    max_output_tokens=400,
                     temperature=0.7
                 )
 
-                # ⚡ [속도 최적화 3] generate_content -> generate_content_stream 으로 변경 (실시간 출력)
                 response_stream = client.models.generate_content_stream(
-                    model="gemini-3.8-flash",
+                    model="gemini-2.5-flash",  # 혹은 사용하시는 gemini-3.8-flash
                     contents=prompt_content,
-                    config=fast_config  # 최적화 설정 반영
+                    config=fast_config
                 )
 
-                # 2단 칼럼 레이아웃으로 결과 분할 출력
                 col1, col2 = st.columns(2)
                 
                 with col1:
                     st.success("🎉 Gemini AI 추천 야식")
-                    # ⚡ [속도 최적화 4] st.write_stream을 활용해 글자가 실시간으로 타이핑되듯 즉시 출력
                     st.write_stream(chunk.text for chunk in response_stream)
                     
                 with col2:
@@ -84,8 +79,9 @@ if st.button("✨ AI 맞춤 추천받기"):
             except Exception as e:
                 st.error(f"❌ API 호출 중 오류가 발생했습니다: {e}")
                 
-    else:
+    else:  # 👈 바로 이 else: 의 들여쓰기가 'if user_story:'와 수직으로 똑같이 맞아야 합니다!
         st.warning("⚠️ 고민 내용을 먼저 작성해 주세요!")
+
 
                 
     else:
