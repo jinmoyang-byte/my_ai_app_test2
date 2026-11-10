@@ -58,7 +58,7 @@ if st.button("✨ AI 맞춤 추천받기"):
 
             # Google Gemini API 호출 (gemini-1.5-flash 모델)
             response = client.models.generate_content(
-                model="models/gemini-2.5-flash",
+                model="models/gemini-3.8-flash",
                 contents=prompt_content
             )
 
